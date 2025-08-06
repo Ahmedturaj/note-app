@@ -1,51 +1,168 @@
 import { Request, Response } from "express";
-import { createNewAccountInDB, verifyUserEmail } from "./user.service";
-import { config } from "../../config";
+import { IUser } from "./user.interface";
+import User from "./user.model";
+import sendResponse from "../../utils/sendResponse";
+import httpStatus from "http-status"; // ✅ Add this
 
 export const createNewAccount = async (req: Request, res: Response) => {
   try {
-    const result = await createNewAccountInDB(req.body);
+    const userInfo: IUser = req.body;
 
-    const { refreshToken, accessToken, user } = result;
+    // ✅ Correctly check if the user already exists
+    const existingUser = await User.findOne({ email: userInfo.email });
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: config.NODE_ENV === "production",
-      sameSite: config.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    if (existingUser) {
+      return res.status(httpStatus.CONFLICT).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
 
-    return res.status(200).json({
+    // ✅ Create a new user
+    const newUser = await User.create(userInfo);
+
+    // ✅ Send response
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
       success: true,
-      code: 200,
-      message: "User created successfully, please verify your email",
-      data: {
-        accessToken,
-        user,
-      },
+      message: "User created successfully",
+      data: newUser,
     });
-  } catch (error: any) {
-    return res
-      .status(400)
-      .json({ success: false, code: 400, message: error.message });
+  } catch (error) {
+    console.error(error);
+
+    sendResponse(res, {
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Something went wrong",
+      data: null,
+    });
   }
 };
 
-export const verifyEmail = async (req: Request, res: Response) => {
+
+
+export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const email = req.body.email;
-    const payload = { otp: req.body.otp };
-
-    const result = await verifyUserEmail(payload, email);
-
-    return res.status(200).json({
+    const allUsers = await User.find();
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
       success: true,
-      message: "Email verified successfully",
-      data: result,
+      message: "Data fetched successfully",
+      data: allUsers,
+    })
+
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, {
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "SomeThing Went wrong.",
+      data: null,
     });
-  } catch (error: any) {
-    return res
-      .status(400)
-      .json({ success: false, message: error.message });
+  }
+}
+
+
+
+export const getSingleUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id).select("-password"); // Don't return password
+
+    if (!user) {
+      return sendResponse(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: "User not found",
+        data: null,
+      });
+    }
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User fetched successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, {
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Something went wrong",
+      data: null,
+    });
+  }
+};
+
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updatedData: Partial<IUser> = req.body;
+
+    const user = await User.findByIdAndUpdate(id, updatedData, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!user) {
+      return sendResponse(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: "User not found",
+        data: null,
+      });
+    }
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, {
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Failed to update user",
+      data: null,
+    });
+  }
+};
+
+
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndDelete(id);
+
+    if (!user) {
+      return sendResponse(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: "User not found",
+        data: null,
+      });
+    }
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User deleted successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, {
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Failed to delete user",
+      data: null,
+    });
   }
 };
