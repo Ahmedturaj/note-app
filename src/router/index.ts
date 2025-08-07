@@ -1,5 +1,6 @@
 import { Router } from "express";
 import noteRouter from "../app/modules/note/note.router";
+import userRouter from "../app/modules/user/user.route";
 
 const router = Router();
 
@@ -9,6 +10,11 @@ const moduleRouter = [
     path: "/note",
     router: noteRouter,
   },
+  
+  {
+    path:"/user",
+    router:userRouter
+  }
 ];
 
 // Register all routes
