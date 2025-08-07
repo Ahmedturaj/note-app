@@ -2,13 +2,13 @@ import { Request, Response } from "express";
 import { IUser } from "./user.interface";
 import User from "./user.model";
 import sendResponse from "../../utils/sendResponse";
-import httpStatus from "http-status"; // ✅ Add this
+import httpStatus from "http-status";
 
 export const createNewAccount = async (req: Request, res: Response) => {
   try {
     const userInfo: IUser = req.body;
 
-    // ✅ Correctly check if the user already exists
+    
     const existingUser = await User.findOne({ email: userInfo.email });
 
     if (existingUser) {
@@ -18,10 +18,10 @@ export const createNewAccount = async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ Create a new user
+   
     const newUser = await User.create(userInfo);
 
-    // ✅ Send response
+    
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
       success: true,
