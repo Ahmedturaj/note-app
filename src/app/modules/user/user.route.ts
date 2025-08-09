@@ -1,13 +1,12 @@
 import express from "express";
-import userValidateRequest from "../../utils/userValidation";
 import { userZodSchema } from "./user.validation";
-import User from "./user.model";
 import { createNewAccount } from "./user.controller";
+import validateRequest from "../../utils/validator";
 
 
 const router = express.Router()
 
-router.post("/signUp", userValidateRequest(userZodSchema),createNewAccount);
+router.post("/signUp", validateRequest(userZodSchema),createNewAccount);
 
 const userRouter= router
 

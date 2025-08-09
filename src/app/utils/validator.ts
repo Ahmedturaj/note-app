@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodSchema } from "zod";
 
-const userValidateRequest = (schema: ZodSchema<any>) => {
+const validateRequest = (schema: ZodSchema<any>) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse(req.body);
@@ -15,4 +15,4 @@ const userValidateRequest = (schema: ZodSchema<any>) => {
   };
 };
 
-export default userValidateRequest;
+export default validateRequest;
