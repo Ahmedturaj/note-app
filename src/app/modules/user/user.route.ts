@@ -7,7 +7,7 @@ import { createNewAccount } from "./user.controller";
 
 const router = express.Router()
 
-router.post("/register", userValidateRequest(userZodSchema),createNewAccount);
+router.post("/signUp", userValidateRequest(userZodSchema),createNewAccount);
 
 const userRouter= router
 
