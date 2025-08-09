@@ -1,8 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
-interface noteType extends Document{
-title:string,
-content:string
-}
+import { noteType } from "./note.interface";
+
 const noteSchema:Schema<noteType> = new Schema<noteType> ({
     title:String,
     content:String,
