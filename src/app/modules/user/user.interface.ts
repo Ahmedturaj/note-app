@@ -7,4 +7,9 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role?: "admin" | "user";
+  address:{
+    city:string,
+    street:string,
+    zip:number
+  }
 }
