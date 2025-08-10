@@ -20,20 +20,16 @@ export const createNewAccount = async (req: Request, res: Response) => {
       });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(userInfo.password, 10);
-
     // Create user
-    const newUser = await User.create({
-      ...userInfo,
-      password: hashedPassword,
-    });
-
+    const user = new User(userInfo);
+    const password = await user.hashPassword(req.body.password);
+    user.password = password;
+    await user.save;
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
       success: true,
       message: "User created successfully",
-      data: newUser,
+      data: user,
     });
   } catch (error) {
     console.error(error);

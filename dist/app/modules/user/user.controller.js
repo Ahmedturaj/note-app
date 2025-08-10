@@ -30,16 +30,15 @@ const createNewAccount = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 data: null,
             });
         }
-        // Hash password
-        const hashedPassword = yield bcryptjs_1.default.hash(userInfo.password, 10);
-        console.log(hashedPassword);
         // Create user
-        const newUser = yield user_model_1.default.create(Object.assign(Object.assign({}, userInfo), { password: hashedPassword }));
+        const user = new user_model_1.default(userInfo);
+        user.hashPassword(req.body.password);
+        yield user.save;
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.CREATED,
             success: true,
             message: "User created successfully",
-            data: newUser,
+            data: user,
         });
     }
     catch (error) {

@@ -52,7 +52,7 @@ const UserSchema = new Schema<IUser, Model<IUser>, UserInstanceMethods>(
 // ---------------- Instance Methods ----------------
 UserSchema.method("hashPassword", async function (plainPassword: string) {
   const password = await bcrypt.hash(plainPassword, 10);
-  this.password = password;
+  return password;
 });
 
 // ---------------- Model ----------------
