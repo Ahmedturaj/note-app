@@ -16,17 +16,25 @@ exports.deleteUser = exports.updateUser = exports.getSingleUser = exports.getAll
 const user_model_1 = __importDefault(require("./user.model"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const createNewAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userInfo = req.body;
+        // Check if user already exists
         const existingUser = yield user_model_1.default.findOne({ email: userInfo.email });
         if (existingUser) {
-            return res.status(http_status_1.default.CONFLICT).json({
+            return (0, sendResponse_1.default)(res, {
+                statusCode: http_status_1.default.CONFLICT,
                 success: false,
                 message: "User already exists",
+                data: null,
             });
         }
-        const newUser = yield user_model_1.default.create(userInfo);
+        // Hash password
+        const hashedPassword = yield bcryptjs_1.default.hash(userInfo.password, 10);
+        console.log(hashedPassword);
+        // Create user
+        const newUser = yield user_model_1.default.create(Object.assign(Object.assign({}, userInfo), { password: hashedPassword }));
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.CREATED,
             success: true,
@@ -47,7 +55,7 @@ const createNewAccount = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.createNewAccount = createNewAccount;
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const allUsers = yield user_model_1.default.find();
+        const allUsers = yield user_model_1.default.find().select("-password");
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.OK,
             success: true,
@@ -60,7 +68,7 @@ const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.INTERNAL_SERVER_ERROR,
             success: false,
-            message: "SomeThing Went wrong.",
+            message: "Something went wrong",
             data: null,
         });
     }
@@ -69,7 +77,7 @@ exports.getAllUsers = getAllUsers;
 const getSingleUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const user = yield user_model_1.default.findById(id).select("-password"); // Don't return password
+        const user = yield user_model_1.default.findById(id).select("-password");
         if (!user) {
             return (0, sendResponse_1.default)(res, {
                 statusCode: http_status_1.default.NOT_FOUND,
@@ -100,6 +108,10 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { id } = req.params;
         const updatedData = req.body;
+        // Hash password if provided in update
+        if (updatedData.password) {
+            updatedData.password = yield bcryptjs_1.default.hash(updatedData.password, 10);
+        }
         const user = yield user_model_1.default.findByIdAndUpdate(id, updatedData, {
             new: true,
             runValidators: true,

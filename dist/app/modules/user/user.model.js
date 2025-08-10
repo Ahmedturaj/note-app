@@ -15,23 +15,13 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -39,7 +29,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const validator_1 = __importDefault(require("validator"));
 const UserSchema = new mongoose_1.Schema({
-    firstName: { type: String, required: true, minlength: 4, maxlength: 20, trim: true },
+    firstName: {
+        type: String,
+        required: [true, "First name is required."],
+        min: [4, "First name must be at least 4 characters long."],
+        max: [20, "First name must be at most 20 characters long."],
+        trim: true
+    },
     lastName: { type: String, required: true, trim: true },
     email: {
         type: String,
@@ -56,12 +52,17 @@ const UserSchema = new mongoose_1.Schema({
         // }
         validate: [validator_1.default.isEmail]
     },
-    password: { type: String, required: true, trim: true },
+    password: {
+        type: String,
+        required: [true, "Password is required"], trim: true,
+        min: [5, "password must be at least 5 characters log"],
+        max: [10, "Password must be at most 10 characters long."]
+    },
     age: {
         type: Number,
-        required: true,
-        min: 18,
-        max: 40
+        required: [true, "Age is required."],
+        min: [18, "You must be at least 18 years old."],
+        max: [40, "You must be at most 40 years old."]
     },
     role: {
         type: String,
