@@ -14,6 +14,6 @@ export interface IUser extends Document {
   };
 }
 
-export interface userInstanceMethod {
-  hashPassword(password: string): string;
+export interface UserInstanceMethods {
+  hashPassword(plainPassword: string): Promise<void>;
 }

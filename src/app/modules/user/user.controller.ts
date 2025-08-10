@@ -22,7 +22,7 @@ export const createNewAccount = async (req: Request, res: Response) => {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(userInfo.password, 10);
-    console.log(hashedPassword);
+
     // Create user
     const newUser = await User.create({
       ...userInfo,
