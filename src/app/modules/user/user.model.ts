@@ -40,6 +40,11 @@ const UserSchema = new Schema<IUser, Model<IUser>, UserInstanceMethods>(
       min: [18, "You must be at least 18 years old."],
       max: [40, "You must be at most 40 years old."],
     },
+    address: {
+      city: String,
+      street: String,
+      zip: Number,
+    },
     role: {
       type: String,
       enum: ["admin", "user"],
